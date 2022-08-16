@@ -2,12 +2,20 @@
 #include <WiFiNINA.h>
 #include <Arduino_LSM6DSOX.h>
 
-float Ax, Ay, Az;
-float Gx, Gy, Gz;
+// Test SD Card
+#include <SPI.h>
+#include <SD.h>
+
+File root;
+
+void printDirectory(File dir, int numTabs);
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 //~~    Allgemeine Variabeln      ~~//
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+
+float Ax, Ay, Az;
+float Gx, Gy, Gz;
 
 int loopcount0, loopcount1 = 0;
 
@@ -41,6 +49,7 @@ void setup()
   }
 
   Serial.println("Starting");
+  Serial.println(BOARD_NAME);
   for (int i = 0; i < 10; i++)
   {
     Serial.print(".");
@@ -55,21 +64,43 @@ void setup()
   digitalWrite(LEDR, LOW);
   digitalWrite(LEDG, LOW);
   digitalWrite(LEDB, HIGH);
+
+  // Test SD
+
+  Serial.print("Initializing SD card...");
+
+  if (!SD.begin(SS))
+  {
+    Serial.println("initialization failed!");
+    return;
+  }
+  Serial.println("initialization done.");
+
+  root = SD.open("/");
+
+  printDirectory(root, 0);
+
+  Serial.println("done!");
 }
 
 void loop()
 {
+
+  /*
   Serial.printf("Lean: %f, Wheele: %f \n", roll, pitch);
 
   delay(500);
   loopcount0++;
+  */
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 //~~             Core1            ~~//
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 void setup1()
-{
+{ 
+
+  
   Serial.println("Second Core");
   if (!IMU.begin())
   {
@@ -77,6 +108,7 @@ void setup1()
     while (1)
       ;
   }
+  
 }
 
 void loop1()
@@ -94,8 +126,7 @@ void loop1()
       refZg = Az;
     }
 
-
-    //Conversion to angles
+    // Conversion to angles
     Ax = Ax - refXg;
     Ay = Ay - refYg;
     Az = Az - refZg + 1;
@@ -114,9 +145,38 @@ void loop1()
     IMU.readGyroscope(Gx, Gy, Gz);
   }
 
-  
-  
-
   delay(100);
   loopcount1++;
+}
+
+
+
+void printDirectory(File dir, int numTabs) {
+  while (true) {
+
+    File entry =  dir.openNextFile();
+    if (! entry) {
+      // no more files
+      break;
+    }
+    for (uint8_t i = 0; i < numTabs; i++) {
+      Serial.print('\t');
+    }
+    Serial.print(entry.name());
+    if (entry.isDirectory()) {
+      Serial.println("/");
+      printDirectory(entry, numTabs + 1);
+    } else {
+      // files have sizes, directories do not
+      Serial.print("\t\t");
+      Serial.print(entry.size(), DEC);
+      time_t cr = entry.getCreationTime();
+      time_t lw = entry.getLastWrite();
+      struct tm * tmstruct = localtime(&cr);
+      Serial.printf("\tCREATION: %d-%02d-%02d %02d:%02d:%02d", (tmstruct->tm_year) + 1900, (tmstruct->tm_mon) + 1, tmstruct->tm_mday, tmstruct->tm_hour, tmstruct->tm_min, tmstruct->tm_sec);
+      tmstruct = localtime(&lw);
+      Serial.printf("\tLAST WRITE: %d-%02d-%02d %02d:%02d:%02d\n", (tmstruct->tm_year) + 1900, (tmstruct->tm_mon) + 1, tmstruct->tm_mday, tmstruct->tm_hour, tmstruct->tm_min, tmstruct->tm_sec);
+    }
+    entry.close();
+  }
 }
