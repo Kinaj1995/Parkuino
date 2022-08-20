@@ -1,29 +1,39 @@
 #include <Arduino.h>
 #include <WiFiNINA.h>
+
+
+
+// IMU
 #include <Arduino_LSM6DSOX.h>
+#include <Wire.h>
 
-// Test SD Card
-#include <SPI.h>
-#include <SD.h>
 
-File root;
-
-void printDirectory(File dir, int numTabs);
+// SD Card
+#include "Storage.h"
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 //~~    Allgemeine Variabeln      ~~//
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 
-float Ax, Ay, Az;
-float Gx, Gy, Gz;
-
 int loopcount0, loopcount1 = 0;
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+//~~           SD-Card            ~~//
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+
+String header = "Loopcount; Pitch; Roll; Ax; Ay; Az; Gx; Gy; Gz";
+String dataString = "";
+
+
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 //~~        Accelerometer         ~~//
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 
 const float alpha = 0.5;
+
+float Ax, Ay, Az;
+float Gx, Gy, Gz;
 
 double fXg = 0;
 double fYg = 0;
@@ -34,6 +44,8 @@ double refYg = 0;
 double refZg = 0;
 
 double pitch, roll;
+
+
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 //~~             Core0            ~~//
@@ -64,44 +76,27 @@ void setup()
   digitalWrite(LEDR, LOW);
   digitalWrite(LEDG, LOW);
   digitalWrite(LEDB, HIGH);
-
-  // Test SD
-
-  Serial.print("Initializing SD card...");
-
-  if (!SD.begin(SS))
-  {
-    Serial.println("initialization failed!");
-    return;
-  }
-  Serial.println("initialization done.");
-
-  root = SD.open("/");
-
-  printDirectory(root, 0);
-
-  Serial.println("done!");
 }
 
 void loop()
 {
 
-  /*
-  Serial.printf("Lean: %f, Wheele: %f \n", roll, pitch);
+  Serial.println("Core 0 Heartbeat");
 
-  delay(500);
+  delay(5000);
   loopcount0++;
-  */
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 //~~             Core1            ~~//
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 void setup1()
-{ 
+{
+  delay(5000);
+  Serial.println("Second Core");
 
   
-  Serial.println("Second Core");
+  // --- Setup IMU
   if (!IMU.begin())
   {
     Serial.println("Failed to initialize IMU!");
@@ -109,11 +104,24 @@ void setup1()
       ;
   }
   
+
+
+
+  // --- Setup SD Card
+  setupStorage();
+  saveFile(header);
 }
 
 void loop1()
 {
 
+  dataString = "";
+
+  //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+  //~~        IMU Messurement       ~~//
+  //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+
+  
   if (IMU.accelerationAvailable())
   {
     IMU.readAcceleration(Ax, Ay, Az);
@@ -138,6 +146,11 @@ void loop1()
     // Roll & Pitch Equations
     roll = -(atan2(-fYg, fZg) * 180.0) / PI;
     pitch = (atan2(fXg, sqrt(fYg * fYg + fZg * fZg)) * 180.0) / PI;
+
+
+
+
+
   }
 
   if (IMU.gyroscopeAvailable())
@@ -145,38 +158,18 @@ void loop1()
     IMU.readGyroscope(Gx, Gy, Gz);
   }
 
-  delay(100);
+
+  //Serial.printf("Roll: %d, Pitch: %d \n", roll, pitch);
+  dataString = (String)loopcount1 + ";" + (String)roll + ";" + (String)pitch + ";" + Ax + ";" + Ay + ";" + Az + ";" + Gx + ";" + Gy + ";" + Gz;
+  
+  //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+  //~~        Saving in File        ~~//
+  //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+
+
+
+  saveFile(dataString);
+  
+  delay(500);
   loopcount1++;
-}
-
-
-
-void printDirectory(File dir, int numTabs) {
-  while (true) {
-
-    File entry =  dir.openNextFile();
-    if (! entry) {
-      // no more files
-      break;
-    }
-    for (uint8_t i = 0; i < numTabs; i++) {
-      Serial.print('\t');
-    }
-    Serial.print(entry.name());
-    if (entry.isDirectory()) {
-      Serial.println("/");
-      printDirectory(entry, numTabs + 1);
-    } else {
-      // files have sizes, directories do not
-      Serial.print("\t\t");
-      Serial.print(entry.size(), DEC);
-      time_t cr = entry.getCreationTime();
-      time_t lw = entry.getLastWrite();
-      struct tm * tmstruct = localtime(&cr);
-      Serial.printf("\tCREATION: %d-%02d-%02d %02d:%02d:%02d", (tmstruct->tm_year) + 1900, (tmstruct->tm_mon) + 1, tmstruct->tm_mday, tmstruct->tm_hour, tmstruct->tm_min, tmstruct->tm_sec);
-      tmstruct = localtime(&lw);
-      Serial.printf("\tLAST WRITE: %d-%02d-%02d %02d:%02d:%02d\n", (tmstruct->tm_year) + 1900, (tmstruct->tm_mon) + 1, tmstruct->tm_mday, tmstruct->tm_hour, tmstruct->tm_min, tmstruct->tm_sec);
-    }
-    entry.close();
-  }
 }
