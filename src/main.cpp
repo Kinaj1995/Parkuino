@@ -1,12 +1,9 @@
 #include <Arduino.h>
 #include <WiFiNINA.h>
 
-
-
 // IMU
 #include <Arduino_LSM6DSOX.h>
 #include <Wire.h>
-
 
 // SD Card
 #include "Storage.h"
@@ -21,31 +18,26 @@ int loopcount0, loopcount1 = 0;
 //~~           SD-Card            ~~//
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 
-String header = "Loopcount; Pitch; Roll; Ax; Ay; Az; Gx; Gy; Gz";
+String header = "Loopcount; Pitch; Roll ;Yaw";
 String dataString = "";
-
-
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 //~~        Accelerometer         ~~//
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 
-const float alpha = 0.5;
+void calibrateIMU(int delayMillis, int calibrationMillis);
+bool readIMU();
+void doCalculations();
+void printCalculations();
 
-float Ax, Ay, Az;
-float Gx, Gy, Gz;
+float accelX, accelY, accelZ,                                // units m/s/s i.e. accelZ if often 9.8 (gravity)
+    gyroX, gyroY, gyroZ,                                     // units dps (degrees per second)
+    gyroDriftX, gyroDriftY, gyroDriftZ,                      // units dps
+    accRoll, accPitch, accYaw,                               // units degrees (roll and pitch noisy, yaw not possible)
+    complementaryRoll, complementaryPitch, complementaryYaw; // units degrees (excellent roll, pitch, yaw minor drift)
 
-double fXg = 0;
-double fYg = 0;
-double fZg = 0;
-
-double refXg = 0;
-double refYg = 0;
-double refZg = 0;
-
-double pitch, roll;
-
-
+long lastTime;
+long lastInterval;
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 //~~             Core0            ~~//
@@ -73,6 +65,8 @@ void setup()
   pinMode(LEDG, OUTPUT);
   pinMode(LEDB, OUTPUT);
 
+  pinMode(LED_BUILTIN, OUTPUT);
+
   digitalWrite(LEDR, LOW);
   digitalWrite(LEDG, LOW);
   digitalWrite(LEDB, HIGH);
@@ -95,7 +89,6 @@ void setup1()
   delay(5000);
   Serial.println("Second Core");
 
-  
   // --- Setup IMU
   if (!IMU.begin())
   {
@@ -103,9 +96,9 @@ void setup1()
     while (1)
       ;
   }
-  
 
-
+  calibrateIMU(250, 250);
+  lastTime = micros();
 
   // --- Setup SD Card
   setupStorage();
@@ -115,61 +108,109 @@ void setup1()
 void loop1()
 {
 
-  dataString = "";
-
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
   //~~        IMU Messurement       ~~//
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 
-  
-  if (IMU.accelerationAvailable())
+  if (readIMU())
   {
-    IMU.readAcceleration(Ax, Ay, Az);
+    long currentTime = micros();
+    lastInterval = currentTime - lastTime; // expecting this to be ~104Hz +- 4%
+    lastTime = currentTime;
 
-    // Calibration, noch anpassen!
-    if (loopcount1 < 1)
-    {
-      refXg = Ax;
-      refYg = Ay;
-      refZg = Az;
-    }
-
-    // Conversion to angles
-    Ax = Ax - refXg;
-    Ay = Ay - refYg;
-    Az = Az - refZg + 1;
-
-    fXg = Ax * alpha + (fXg * (1.0 - alpha));
-    fYg = Ay * alpha + (fYg * (1.0 - alpha));
-    fZg = Az * alpha + (fZg * (1.0 - alpha));
-
-    // Roll & Pitch Equations
-    roll = -(atan2(-fYg, fZg) * 180.0) / PI;
-    pitch = (atan2(fXg, sqrt(fYg * fYg + fZg * fZg)) * 180.0) / PI;
-
-
-
-
-
+    doCalculations();
+    printCalculations();
   }
 
-  if (IMU.gyroscopeAvailable())
-  {
-    IMU.readGyroscope(Gx, Gy, Gz);
-  }
-
-
-  //Serial.printf("Roll: %d, Pitch: %d \n", roll, pitch);
-  dataString = (String)loopcount1 + ";" + (String)roll + ";" + (String)pitch + ";" + Ax + ";" + Ay + ";" + Az + ";" + Gx + ";" + Gy + ";" + Gz;
-  
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
   //~~        Saving in File        ~~//
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+  dataString = (String)loopcount1 + ";" + (String)complementaryRoll + ";" + (String)complementaryPitch + ";" + (String)complementaryYaw;
+  // saveFile(dataString);
 
-
-
-  saveFile(dataString);
-  
-  delay(500);
   loopcount1++;
+  // delay(100);
+}
+
+/*
+  the gyro's x,y,z values drift by a steady amount. if we measure this when arduino is still
+  we can correct the drift when doing real measurements later
+*/
+void calibrateIMU(int delayMillis, int calibrationMillis)
+{
+
+  int calibrationCount = 0;
+
+  delay(delayMillis); // to avoid shakes after pressing reset button
+
+  float sumX, sumY, sumZ;
+  int startTime = millis();
+  while (millis() < startTime + calibrationMillis)
+  {
+    if (readIMU())
+    {
+      // in an ideal world gyroX/Y/Z == 0, anything higher or lower represents drift
+      sumX += gyroX;
+      sumY += gyroY;
+      sumZ += gyroZ;
+
+      calibrationCount++;
+    }
+  }
+
+  if (calibrationCount == 0)
+  {
+    Serial.println("Failed to calibrate");
+  }
+
+  gyroDriftX = sumX / calibrationCount;
+  gyroDriftY = sumY / calibrationCount;
+  gyroDriftZ = sumZ / calibrationCount;
+}
+
+/**
+   Read accel and gyro data.
+   returns true if value is 'new' and false if IMU is returning old cached data
+*/
+bool readIMU()
+{
+  if (IMU.accelerationAvailable() && IMU.gyroscopeAvailable())
+  {
+    IMU.readAcceleration(accelX, accelY, accelZ);
+    IMU.readGyroscope(gyroX, gyroY, gyroZ);
+    return true;
+  }
+  return false;
+}
+
+/**
+   I'm expecting, over time, the Arduino_LSM6DS3.h will add functions to do most of this,
+   but as of 1.0.0 this was missing.
+*/
+void doCalculations()
+{
+  accRoll = atan2(accelY, accelZ) * 180 / PI;
+  accPitch = atan2(-accelX, sqrt(accelY * accelY + accelZ * accelZ)) * 180 / PI;
+
+  float lastFrequency = (float)1000000.0 / lastInterval;
+
+  complementaryRoll = complementaryRoll + ((gyroX - gyroDriftX) / lastFrequency);
+  complementaryPitch = complementaryPitch + ((gyroY - gyroDriftY) / lastFrequency);
+  complementaryYaw = complementaryYaw + ((gyroZ - gyroDriftZ) / lastFrequency);
+
+  complementaryRoll = 0.98 * complementaryRoll + 0.02 * accRoll;
+  complementaryPitch = 0.98 * complementaryPitch + 0.02 * accPitch;
+}
+
+/**
+   This comma separated format is best 'viewed' using 'serial plotter' or processing.org client (see ./processing/RollPitchYaw3d.pde example)
+*/
+void printCalculations()
+{
+  Serial.print(complementaryRoll);
+  Serial.print(',');
+  Serial.print(complementaryPitch);
+  Serial.print(',');
+  Serial.print(complementaryYaw);
+  Serial.println("");
 }

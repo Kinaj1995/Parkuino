@@ -28,4 +28,5 @@ Folgendermassen muss der SD Kartenleser am Arduino angeschlossen werden.
 
 ## Linksammlung
 
+* IMU: https://github.com/owennewo/Arduino_LSM6DS3/blob/master/examples/RollPitchYaw/RollPitchYaw.ino
 * SD-Card Libary: https://github.com/earlephilhower/arduino-pico/tree/master/libraries/SD
