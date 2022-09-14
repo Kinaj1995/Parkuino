@@ -1,0 +1,48 @@
+[
+    {
+        "id": "baa903a310ae0e18",
+        "type": "ui_gauge",
+        "z": "14742902531abb6e",
+        "name": "",
+        "group": "473094bd99771595",
+        "order": 0,
+        "width": "3",
+        "height": "3",
+        "gtype": "gage",
+        "title": "Batteriespannung",
+        "label": "V",
+        "format": "{{msg.payload.bat_voltage}}",
+        "min": "10",
+        "max": "14",
+        "colors": [
+            "#b31b00",
+            "#e6e600",
+            "#3acb3c"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "className": "",
+        "x": 750,
+        "y": 500,
+        "wires": []
+    },
+    {
+        "id": "473094bd99771595",
+        "type": "ui_group",
+        "name": "GUI",
+        "tab": "be3ce4593e7970b4",
+        "order": 1,
+        "disp": true,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "be3ce4593e7970b4",
+        "type": "ui_tab",
+        "name": "Motorrad",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    }
+]
