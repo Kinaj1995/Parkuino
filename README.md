@@ -22,3 +22,8 @@ Authoren: Janik Schilter und Pascal Rusca
     "bat_voltage": 12.7
 }
 ```
+
+
+
+
+## Server
