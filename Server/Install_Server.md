@@ -38,8 +38,8 @@ sudo nano /etc/mosquitto/conf.d/connect.conf
 ```
 
 ```text
-per_listener_settings true
-listener 1883 
+allow_anonymous false
+listener 1883
 password_file /etc/mosquitto/passwd
 ```
 
