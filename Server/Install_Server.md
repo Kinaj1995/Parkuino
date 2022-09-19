@@ -39,12 +39,7 @@ sudo nano /etc/mosquitto/conf.d/connect.conf
 
 ```text
 per_listener_settings true
-pid_file /run/mosquitto/mosquitto.pid
-persistence true
-persistence_location /var/lib/mosquitto/
-log_dest file /var/log/mosquitto/mosquitto.log
-include_dir /etc/mosquitto/conf.d
-allow_anonymous false
+
 listener 1883 
 password_file /etc/mosquitto/passwd
 ```
