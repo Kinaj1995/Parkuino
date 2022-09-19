@@ -39,7 +39,11 @@ sudo nano /etc/mosquitto/conf.d/connect.conf
 
 ```text
 per_listener_settings true
+<<<<<<< HEAD
 allow_anonymous false
+=======
+
+>>>>>>> 7c6e1979415ba729ee669d07b0df5b4b734138f3
 listener 1883 
 password_file /etc/mosquitto/passwd
 ```

@@ -8,7 +8,9 @@ https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_in
 
 https://github.com/adafruit/Adafruit_AM2320.git
 
+https://github.com/marvinroger/async-mqtt-client/archive/master.zip
 
+https://github.com/me-no-dev/AsyncTCP/archive/master.zip
 
 ## Install Temp/Hum - AM2320
 
@@ -22,8 +24,6 @@ Den Sensor wie folgt am M5-Stack anschliessen:
 ![Sensor_Temp-Hum](/docs/images/am2320_wiring.png)
 
 Arduino Library
-
-
 
 
 
