@@ -51,10 +51,13 @@ password_file /etc/mosquitto/passwd
 bash <(curl -sL https://raw.githubusercontent.com/node-red/linux-installers/master/deb/update-nodejs-and-nodered)
 ```
 
-Um ein Dashboard verwenden zu können muss noch dei Pallete "node-red-dashboard" installiert werden.
+
 
 NodeRED als Dienst aktivieren
 ```bash
 sudo systemctl enable nodered.service
 sudo systemctl start nodered.service
 ```
+
+Um ein Dashboard verwenden zu können muss noch dei Pallete "node-red-dashboard" installiert werden.
+Danach kann die NodeRED-FLOW.json Datei importiert werden.
