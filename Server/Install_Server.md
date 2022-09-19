@@ -3,7 +3,7 @@
 Betriebsystem aktualisieren
 
 ```bash
-sudo apt update && sudo apt upgrade –y
+sudo apt update && sudo apt upgrade -y
 ```
 
 ```bash
@@ -39,11 +39,6 @@ sudo nano /etc/mosquitto/conf.d/connect.conf
 
 ```text
 per_listener_settings true
-pid_file /run/mosquitto/mosquitto.pid
-persistence true
-persistence_location /var/lib/mosquitto/
-log_dest file /var/log/mosquitto/mosquitto.log
-include_dir /etc/mosquitto/conf.d
 allow_anonymous false
 listener 1883 
 password_file /etc/mosquitto/passwd
@@ -58,3 +53,9 @@ bash <(curl -sL https://raw.githubusercontent.com/node-red/linux-installers/mast
 ```
 
 Um ein Dashboard verwenden zu können muss noch dei Pallete "node-red-dashboard" installiert werden.
+
+NodeRED als Dienst aktivieren
+```bash
+sudo systemctl enable nodered.service
+sudo systemctl start nodered.service
+```

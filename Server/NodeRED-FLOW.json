@@ -1,8 +1,15 @@
 [
     {
+        "id": "f6f2187d.f17ca8",
+        "type": "tab",
+        "label": "Motorrad",
+        "disabled": false,
+        "info": ""
+    },
+    {
         "id": "73b65f2b52072e91",
         "type": "inject",
-        "z": "14742902531abb6e",
+        "z": "f6f2187d.f17ca8",
         "name": "",
         "props": [
             {
@@ -20,13 +27,198 @@
         "topic": "test",
         "payload": "{\"temp\":23,\"hum\":98.8,\"bat_voltage\":12.7}",
         "payloadType": "json",
-        "x": 350,
-        "y": 720,
+        "x": 270,
+        "y": 680,
         "wires": [
             [
-                "e1b5b7e145053bb2",
-                "634bba1088732967"
+                "29e83ce5c363a120"
             ]
         ]
+    },
+    {
+        "id": "29e83ce5c363a120",
+        "type": "mqtt out",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "topic": "motorrad",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "c4e88d442e3ae80c",
+        "x": 640,
+        "y": 680,
+        "wires": []
+    },
+    {
+        "id": "71170bf1110a2505",
+        "type": "mqtt in",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "topic": "motorrad",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "c4e88d442e3ae80c",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 260,
+        "y": 400,
+        "wires": [
+            [
+                "f69f4ac918530dd0",
+                "bdba4690bbf04ddf",
+                "4902feb6719e74a1",
+                "af5e822388abce17"
+            ]
+        ]
+    },
+    {
+        "id": "f69f4ac918530dd0",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 720,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "bdba4690bbf04ddf",
+        "type": "ui_gauge",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "group": "1b53e5291df640e8",
+        "order": 0,
+        "width": "4",
+        "height": "4",
+        "gtype": "gage",
+        "title": "Lufttemperatur",
+        "label": "°C",
+        "format": "{{msg.payload.temp}}",
+        "min": "-20",
+        "max": "50",
+        "colors": [
+            "#00fbff",
+            "#00e645",
+            "#ff0000"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "className": "",
+        "x": 740,
+        "y": 460,
+        "wires": []
+    },
+    {
+        "id": "4902feb6719e74a1",
+        "type": "ui_gauge",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "group": "1b53e5291df640e8",
+        "order": 0,
+        "width": "4",
+        "height": "4",
+        "gtype": "gage",
+        "title": "Luftfeuchtigkeit",
+        "label": "%",
+        "format": "{{msg.payload.hum}}",
+        "min": "0",
+        "max": "100",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "className": "",
+        "x": 740,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "af5e822388abce17",
+        "type": "ui_gauge",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "group": "1b53e5291df640e8",
+        "order": 0,
+        "width": "4",
+        "height": "4",
+        "gtype": "gage",
+        "title": "Batteriespannung",
+        "label": "V",
+        "format": "{{msg.payload.bat_voltage}}",
+        "min": "10",
+        "max": "14",
+        "colors": [
+            "#ff0000",
+            "#e6e600",
+            "#00ff40"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "className": "",
+        "x": 750,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "c4e88d442e3ae80c",
+        "type": "mqtt-broker",
+        "name": "Local MQTT",
+        "broker": "127.0.0.1",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "1b53e5291df640e8",
+        "type": "ui_group",
+        "name": "Motorrad",
+        "tab": "53ca0d86aec28061",
+        "order": 1,
+        "disp": true,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "53ca0d86aec28061",
+        "type": "ui_tab",
+        "name": "Motorrad",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
     }
 ]
