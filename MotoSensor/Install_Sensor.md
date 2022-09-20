@@ -12,11 +12,14 @@ https://github.com/marvinroger/async-mqtt-client/archive/master.zip
 
 https://github.com/me-no-dev/AsyncTCP/archive/master.zip
 
+
+
+
 ## Install Temp/Hum - AM2320
 
 Wir verwenden den Sensor AM2320:
 
-![Sensor_Temp-Hum](/docs/images/am2320.png)
+![Sensor_Temp-Hum](/docs/images/AM2320.png)
 
 
 Den Sensor wie folgt am M5-Stack anschliessen:
