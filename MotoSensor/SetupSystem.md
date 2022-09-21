@@ -4,8 +4,6 @@
 
 Installiere folgende Libraries in der Arduino IDE:
 
-Library ArduinoJson
-
 https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
 
 https://github.com/adafruit/Adafruit_AM2320.git
@@ -14,6 +12,7 @@ https://github.com/marvinroger/async-mqtt-client/archive/master.zip
 
 https://github.com/me-no-dev/AsyncTCP/archive/master.zip
 
+https://github.com/bblanchon/ArduinoJson.git
 
 
 ## Hardware - M5Stack

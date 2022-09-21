@@ -35,7 +35,7 @@ Adafruit_AM2320 am2320 = Adafruit_AM2320();
 //#define WIFI_PASSWORD "pfrv-4lrj-8vwq-pihb"
 
 // Raspberry Pi Mosquitto MQTT Broker
-#define MQTT_HOST IPAddress(192, 168, 47, 60)
+#define MQTT_HOST IPAddress(192, 168, 47, 7)
 #define MQTT_PORT 1883
 
 // MQTT Topics
@@ -186,7 +186,10 @@ void loop() {
     uint16_t packetIdPub1 = mqttClient.publish(MQTT_PUB_MOTO, 1, true, payload);    
                             
     Serial.printf("Publishing on topic %s at QoS 1, packetId: %i: ", MQTT_PUB_MOTO, packetIdPub1);
-    Serial.printf("Message: %.2f \n", temp); 
+    Serial.println(payload); 
+    Serial.println(temp); 
+    Serial.println(hum); 
+
   }
 
 
