@@ -21,7 +21,7 @@
         "once": false,
         "onceDelay": 0.1,
         "topic": "",
-        "payload": "{\"temp\":23,\"hum\":98.8,\"bat_voltage\":12.7}",
+        "payload": "{\"temp\":23,\"hum\":45,\"bat_voltage\":10.7}",
         "payloadType": "json",
         "x": 270,
         "y": 280,
@@ -55,7 +55,7 @@
         "z": "f6f2187d.f17ca8",
         "name": "",
         "topic": "motorrad",
-        "qos": "2",
+        "qos": "1",
         "datatype": "auto-detect",
         "broker": "c4e88d442e3ae80c",
         "nl": false,
@@ -66,7 +66,8 @@
         "y": 400,
         "wires": [
             [
-                "458f0971441f1625"
+                "458f0971441f1625",
+                "f69f4ac918530dd0"
             ]
         ]
     },
@@ -75,7 +76,7 @@
         "type": "debug",
         "z": "f6f2187d.f17ca8",
         "name": "Debug Output",
-        "active": false,
+        "active": true,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -83,8 +84,8 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 740,
-        "y": 400,
+        "x": 660,
+        "y": 300,
         "wires": []
     },
     {
@@ -186,7 +187,6 @@
                 "bdba4690bbf04ddf",
                 "4902feb6719e74a1",
                 "af5e822388abce17",
-                "f69f4ac918530dd0",
                 "a9388691148b1fd8",
                 "1383204a6cc6a758"
             ]
@@ -224,7 +224,7 @@
         "type": "debug",
         "z": "f6f2187d.f17ca8",
         "name": "Test Alert",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -254,15 +254,35 @@
                 "049ddf100300c8ed"
             ],
             [
-                "049ddf100300c8ed"
+                "049ddf100300c8ed",
+                "1c7ec10296c137b7"
             ]
         ]
+    },
+    {
+        "id": "1c7ec10296c137b7",
+        "type": "ui_toast",
+        "z": "f6f2187d.f17ca8",
+        "position": "top right",
+        "displayTime": "3",
+        "highlight": "",
+        "sendall": true,
+        "outputs": 0,
+        "ok": "OK",
+        "cancel": "",
+        "raw": false,
+        "className": "",
+        "topic": "",
+        "name": "Send Dashboard Notification",
+        "x": 1080,
+        "y": 500,
+        "wires": []
     },
     {
         "id": "c4e88d442e3ae80c",
         "type": "mqtt-broker",
         "name": "Local MQTT",
-        "broker": "127.0.0.1",
+        "broker": "localhost",
         "port": "1883",
         "clientid": "",
         "autoConnect": true,
