@@ -18,12 +18,14 @@ sudo apt install mosquitto mosquitto-clients -y
 ```
 
 MQTT Server als Dienst aktivieren und die Version prüfen
+
 ```bash
 sudo systemctl enable mosquitto.service
 mosquitto -v
 ```
 
 MQTT Benutzer erstellen mit dem Namen "admin"
+
 ```bash
 sudo mosquitto_passwd -c /etc/mosquitto/passwd admin
 ```
@@ -33,6 +35,7 @@ Benutzername: admin
 Passwort: 6010Kriens
 
 Nun noch eine Konfigurationsfile erstellt werden damit der Server von ausserhalb erreichbar ist.
+
 ```bash
 sudo nano /etc/mosquitto/conf.d/connect.conf
 ```
