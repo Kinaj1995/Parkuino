@@ -4,6 +4,8 @@
 
 Installiere folgende Libraries in der Arduino IDE:
 
+Library ArduinoJson
+
 https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
 
 https://github.com/adafruit/Adafruit_AM2320.git

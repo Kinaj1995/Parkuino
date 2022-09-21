@@ -16,6 +16,7 @@
 #include <M5Stack.h>
 #include "Adafruit_Sensor.h"
 #include "Adafruit_AM2320.h"
+#include <ArduinoJson.h>
 #include <WiFi.h>
 extern "C" {
   #include "freertos/FreeRTOS.h"
@@ -27,14 +28,14 @@ Adafruit_AM2320 am2320 = Adafruit_AM2320();
 
 ///////////////////////////////////////////////////////////////////
 // #define
-//#define WIFI_SSID "L-TEKO"
-//#define WIFI_PASSWORD "teko2016"
+#define WIFI_SSID "L-TEKO"
+#define WIFI_PASSWORD "teko2016"
 
-#define WIFI_SSID "nyc-68449-2.4"
-#define WIFI_PASSWORD "pfrv-4lrj-8vwq-pihb"
+//#define WIFI_SSID "nyc-68449-2.4"
+//#define WIFI_PASSWORD "pfrv-4lrj-8vwq-pihb"
 
 // Raspberry Pi Mosquitto MQTT Broker
-#define MQTT_HOST IPAddress(192, 168, 1, 113)
+#define MQTT_HOST IPAddress(192, 168, 47, 60)
 #define MQTT_PORT 1883
 
 // MQTT Topics
@@ -51,7 +52,7 @@ Adafruit_AM2320 am2320 = Adafruit_AM2320();
   int batVoltage;
   float voltage;
 
-  DynamicJsonDocument jsonDoc(1024);
+  DynamicJsonDocument doc(1024);
 
   AsyncMqttClient mqttClient;
   TimerHandle_t mqttReconnectTimer;
@@ -163,10 +164,14 @@ void loop() {
 // Verarbeitung
   voltage = batVoltage * (5.0 / 1023.0);  // Convert the analog reading (which goes from 0 - 1023) to a voltage (0 - 5V):
 
-  jsonDoc["temp"]         = temp;
-  jsonDoc["hum"]          = hum;
-  jsonDoc["bat_voltage"]  = voltage;
+  // Give Values to Json Object
+  doc["temp"]         = temp;
+  doc["hum"]          = hum;
+  doc["bat_voltage"]  = voltage;
 
+  // Serialize Json
+  char payload[1024];
+  serializeJson(doc, payload);
 
 /////////////////////////////////
 // Ausgabe
@@ -175,10 +180,10 @@ void loop() {
   // it publishes a new MQTT message
   if (currentMillis - previousMillis >= interval) {
     // Save the last time a new reading was published
-    previousMillis = currentMillis;s
+    previousMillis = currentMillis;
     
     // Publish an MQTT message on topic "motorrad"
-    uint16_t packetIdPub1 = mqttClient.publish(MQTT_PUB_MOTO, 1, true, serializeJson(jsonDoc, Serial));    
+    uint16_t packetIdPub1 = mqttClient.publish(MQTT_PUB_MOTO, 1, true, payload);    
                             
     Serial.printf("Publishing on topic %s at QoS 1, packetId: %i: ", MQTT_PUB_MOTO, packetIdPub1);
     Serial.printf("Message: %.2f \n", temp); 
