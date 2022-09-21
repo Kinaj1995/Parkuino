@@ -27,17 +27,18 @@ Adafruit_AM2320 am2320 = Adafruit_AM2320();
 
 ///////////////////////////////////////////////////////////////////
 // #define
-#define WIFI_SSID "L-TEKO"
-#define WIFI_PASSWORD "teko2016"
+//#define WIFI_SSID "L-TEKO"
+//#define WIFI_PASSWORD "teko2016"
+
+#define WIFI_SSID "nyc-68449-2.4"
+#define WIFI_PASSWORD "pfrv-4lrj-8vwq-pihb"
 
 // Raspberry Pi Mosquitto MQTT Broker
 #define MQTT_HOST IPAddress(192, 168, 1, 113)
 #define MQTT_PORT 1883
 
-// Temperature MQTT Topics
-#define MQTT_PUB_TEMP "esp32/dht/temperature"
-#define MQTT_PUB_HUM  "esp32/dht/humidity"
-#define MQTT_PUB_VOLT "esp32/dht/voltage"
+// MQTT Topics
+#define MQTT_PUB_MOTO "motorrad"
 
 // Analog pin connected to the AM2320-sensor
 #define AM2320_PIN 21, 22 
@@ -49,6 +50,8 @@ Adafruit_AM2320 am2320 = Adafruit_AM2320();
   int hum; 
   int batVoltage;
   float voltage;
+
+  DynamicJsonDocument jsonDoc(1024);
 
   AsyncMqttClient mqttClient;
   TimerHandle_t mqttReconnectTimer;
@@ -160,6 +163,11 @@ void loop() {
 // Verarbeitung
   voltage = batVoltage * (5.0 / 1023.0);  // Convert the analog reading (which goes from 0 - 1023) to a voltage (0 - 5V):
 
+  jsonDoc["temp"]         = temp;
+  jsonDoc["hum"]          = hum;
+  jsonDoc["bat_voltage"]  = voltage;
+
+
 /////////////////////////////////
 // Ausgabe
   unsigned long currentMillis = millis();
@@ -167,22 +175,13 @@ void loop() {
   // it publishes a new MQTT message
   if (currentMillis - previousMillis >= interval) {
     // Save the last time a new reading was published
-    previousMillis = currentMillis;
+    previousMillis = currentMillis;s
     
-    // Publish an MQTT message on topic esp32/dht/temperature
-    uint16_t packetIdPub1 = mqttClient.publish(MQTT_PUB_TEMP, 1, true, String(temp).c_str());                            
-    Serial.printf("Publishing on topic %s at QoS 1, packetId: %i", MQTT_PUB_TEMP, packetIdPub1);
-    Serial.printf("Message: %.2f \n", temp);
-
-    // Publish an MQTT message on topic esp32/dht/humidity
-    uint16_t packetIdPub2 = mqttClient.publish(MQTT_PUB_HUM, 1, true, String(hum).c_str());                            
-    Serial.printf("Publishing on topic %s at QoS 1, packetId %i: ", MQTT_PUB_HUM, packetIdPub2);
-    Serial.printf("Message: %.2f \n", hum);
-
-    // Publish an MQTT message on topic esp32/dht/voltage
-    uint16_t packetIdPub3 = mqttClient.publish(MQTT_PUB_VOLT, 1, true, String(voltage).c_str());                            
-    Serial.printf("Publishing on topic %s at QoS 1, packetId %i: ", MQTT_PUB_VOLT, packetIdPub3);
-    Serial.printf("Message: %.2f \n", voltage);    
+    // Publish an MQTT message on topic "motorrad"
+    uint16_t packetIdPub1 = mqttClient.publish(MQTT_PUB_MOTO, 1, true, serializeJson(jsonDoc, Serial));    
+                            
+    Serial.printf("Publishing on topic %s at QoS 1, packetId: %i: ", MQTT_PUB_MOTO, packetIdPub1);
+    Serial.printf("Message: %.2f \n", temp); 
   }
 
 
