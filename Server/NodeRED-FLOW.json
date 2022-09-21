@@ -14,21 +14,17 @@
         "props": [
             {
                 "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
             }
         ],
         "repeat": "",
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
-        "topic": "test",
-        "payload": "{\"temp\":23,\"hum\":98.8,\"bat_voltage\":12.7}",
+        "topic": "",
+        "payload": "{\"temp\":23,\"hum\":45,\"bat_voltage\":10.7}",
         "payloadType": "json",
         "x": 270,
-        "y": 680,
+        "y": 280,
         "wires": [
             [
                 "29e83ce5c363a120"
@@ -49,8 +45,8 @@
         "correl": "",
         "expiry": "",
         "broker": "c4e88d442e3ae80c",
-        "x": 640,
-        "y": 680,
+        "x": 420,
+        "y": 280,
         "wires": []
     },
     {
@@ -59,7 +55,7 @@
         "z": "f6f2187d.f17ca8",
         "name": "",
         "topic": "motorrad",
-        "qos": "2",
+        "qos": "1",
         "datatype": "auto-detect",
         "broker": "c4e88d442e3ae80c",
         "nl": false,
@@ -70,10 +66,8 @@
         "y": 400,
         "wires": [
             [
-                "f69f4ac918530dd0",
-                "bdba4690bbf04ddf",
-                "4902feb6719e74a1",
-                "af5e822388abce17"
+                "458f0971441f1625",
+                "f69f4ac918530dd0"
             ]
         ]
     },
@@ -81,7 +75,7 @@
         "id": "f69f4ac918530dd0",
         "type": "debug",
         "z": "f6f2187d.f17ca8",
-        "name": "debug 1",
+        "name": "Debug Output",
         "active": true,
         "tosidebar": true,
         "console": false,
@@ -90,8 +84,8 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 720,
-        "y": 400,
+        "x": 660,
+        "y": 300,
         "wires": []
     },
     {
@@ -118,7 +112,7 @@
         "seg2": "",
         "className": "",
         "x": 740,
-        "y": 460,
+        "y": 560,
         "wires": []
     },
     {
@@ -145,7 +139,7 @@
         "seg2": "",
         "className": "",
         "x": 740,
-        "y": 520,
+        "y": 600,
         "wires": []
     },
     {
@@ -172,14 +166,123 @@
         "seg2": "",
         "className": "",
         "x": 750,
-        "y": 580,
+        "y": 640,
+        "wires": []
+    },
+    {
+        "id": "458f0971441f1625",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "Inject Timestamp",
+        "func": "msg.payload.timestamp = new Date()\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 450,
+        "y": 400,
+        "wires": [
+            [
+                "bdba4690bbf04ddf",
+                "4902feb6719e74a1",
+                "af5e822388abce17",
+                "a9388691148b1fd8",
+                "1383204a6cc6a758"
+            ]
+        ]
+    },
+    {
+        "id": "6a04956793b8d017",
+        "type": "comment",
+        "z": "f6f2187d.f17ca8",
+        "name": "Projektbeschreibung",
+        "info": "# Motorrad überwachung beim Überwintern",
+        "x": 110,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "a9388691148b1fd8",
+        "type": "ui_text",
+        "z": "f6f2187d.f17ca8",
+        "group": "1b53e5291df640e8",
+        "order": 3,
+        "width": "4",
+        "height": "1",
+        "name": "",
+        "label": "Uhrzeit",
+        "format": "{{msg.payload.timestamp}}",
+        "layout": "row-center",
+        "className": "",
+        "x": 720,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "049ddf100300c8ed",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "Test Alert",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1020,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "1383204a6cc6a758",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "Alerting",
+        "func": "var newMsg;\n\n\n// Tempraturalarm\nif(msg.payload.temp < 0){\n    newMsg = { payload: \"Achtung Wasser könte Gefrieren!\"};\n}\n\n\n// Luftfeuchtigkeitsalarm\nif (msg.payload.hum > 70) {\n    newMsg = { payload: \"Motorrad muss an die Frische Luft!\"};\n}\n\n\n// Batteriealarm\nif (msg.payload.bat_voltage < 12) {\n    newMsg = { payload: \"Motorrad braucht dringends ein bischen Strom!\"};\n}\n\n//newMsg = { payload: \"Achtung Wasser könte Gefrieren!\" };\n\nreturn [msg, newMsg];",
+        "outputs": 2,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 720,
+        "y": 460,
+        "wires": [
+            [
+                "049ddf100300c8ed"
+            ],
+            [
+                "049ddf100300c8ed",
+                "1c7ec10296c137b7"
+            ]
+        ]
+    },
+    {
+        "id": "1c7ec10296c137b7",
+        "type": "ui_toast",
+        "z": "f6f2187d.f17ca8",
+        "position": "top right",
+        "displayTime": "3",
+        "highlight": "",
+        "sendall": true,
+        "outputs": 0,
+        "ok": "OK",
+        "cancel": "",
+        "raw": false,
+        "className": "",
+        "topic": "",
+        "name": "Send Dashboard Notification",
+        "x": 1080,
+        "y": 500,
         "wires": []
     },
     {
         "id": "c4e88d442e3ae80c",
         "type": "mqtt-broker",
         "name": "Local MQTT",
-        "broker": "127.0.0.1",
+        "broker": "localhost",
         "port": "1883",
         "clientid": "",
         "autoConnect": true,
