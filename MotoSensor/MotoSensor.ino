@@ -31,11 +31,8 @@ Adafruit_AM2320 am2320 = Adafruit_AM2320();
 #define WIFI_SSID "L-TEKO"
 #define WIFI_PASSWORD "teko2016"
 
-//#define WIFI_SSID "nyc-68449-2.4"
-//#define WIFI_PASSWORD "pfrv-4lrj-8vwq-pihb"
-
 // Raspberry Pi Mosquitto MQTT Broker
-#define MQTT_HOST IPAddress(192, 168, 47, 7)
+#define MQTT_HOST IPAddress(192, 168, 0, 253)
 #define MQTT_PORT 1883
 
 // MQTT Topics
@@ -49,8 +46,11 @@ Adafruit_AM2320 am2320 = Adafruit_AM2320();
 // Variablen und Objekte
   int temp;
   int hum; 
-  int batVoltage;
+  float batVoltage;
   float voltage;
+  String sTemp;
+  String sHum;
+  String sVoltage;
 
   DynamicJsonDocument doc(1024);
 
@@ -117,6 +117,8 @@ void setup() {
     delay(10); // hang out until serial port opens
   }
 
+  M5.begin();
+
   Serial.println("Adafruit AM2320 Basic Test");
   am2320.begin();
 
@@ -143,9 +145,11 @@ void loop() {
 
   // read temperature from sensor am2320
   temp = am2320.readTemperature(); 
+  sTemp = String(temp);
   
   // read humidity from sensor am2320   
   hum = am2320.readHumidity();    
+  sHum = String(hum);
      
   // read the input on analog pin G35
   batVoltage = analogRead(G35);          
@@ -162,7 +166,9 @@ void loop() {
 
 /////////////////////////////////
 // Verarbeitung
-  voltage = batVoltage * (5.0 / 1023.0);  // Convert the analog reading (which goes from 0 - 1023) to a voltage (0 - 5V):
+  
+  voltage= map(batVoltage, 0, 4095, 0, 18); //Umwandeln des Sensorwertes mit Hilfe des "map" Befehls. Da der Map-Befehl keine Kommastellen ausgibt, wird hier vorerst mit größeren Zahlen gearbeitet.
+  sVoltage = String(voltage);
 
   // Give Values to Json Object
   doc["temp"]         = temp;
@@ -184,20 +190,25 @@ void loop() {
     
     // Publish an MQTT message on topic "motorrad"
     uint16_t packetIdPub1 = mqttClient.publish(MQTT_PUB_MOTO, 1, true, payload);    
-                            
-    Serial.printf("Publishing on topic %s at QoS 1, packetId: %i: ", MQTT_PUB_MOTO, packetIdPub1);
-    Serial.println(payload); 
-    Serial.println(temp); 
-    Serial.println(hum); 
 
+    M5.Lcd.clear(BLACK); 
+    M5.Lcd.setTextSize(2);
+    M5.Lcd.setCursor(40, 60);
+    M5.Lcd.print("Temp: " + sTemp);
+    M5.Lcd.setCursor(40, 100);
+    M5.Lcd.print("Hum: " + sHum);
+    M5.Lcd.setCursor(40, 140);
+    M5.Lcd.print("Volt: " + sVoltage);                  
   }
-
 
 /////////////////////////////////
 // Debug
-  //Serial.print("temp: "); Serial.println(temp);
-  //Serial.print("hum: "); Serial.println(hum);
-  //Serial.print("bat_voltage: "); Serial.println(voltage);
+    //Serial.printf("Publishing on topic %s at QoS 1, packetId: %i: ", MQTT_PUB_MOTO, packetIdPub1);
+    Serial.println(payload); 
+    Serial.println(temp); 
+    Serial.println(hum); 
+    Serial.println(batVoltage); 
+    Serial.println(voltage); 
 
-  //delay(2000);
+    delay(2000);
 }
